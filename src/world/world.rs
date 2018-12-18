@@ -6,7 +6,7 @@ use ncollide;
 use ncollide::broad_phase::BroadPhasePairFilter;
 use ncollide::events::{ContactEvents, ProximityEvents};
 use ncollide::shape::ShapeHandle;
-use ncollide::world::{CollisionGroups, CollisionObjectHandle, GeometricQueryType};
+use ncollide::world::{CollisionObjectHandle, GeometricQueryType};
 
 use counters::Counters;
 use detection::{ActivationManager, ColliderContactManifold};
@@ -494,8 +494,7 @@ impl<N: Real> World<N> {
         };
 
         let data = ColliderData::new(margin, parent, ndofs, to_parent, material);
-        let groups = CollisionGroups::new();
-        let handle = self.cworld.add(pos, shape, groups, query, data);
+        let handle = self.cworld.add(pos, shape, 0, query, data);
 
         if !parent.is_ground() {
             self.colliders_w_parent.push(handle);
