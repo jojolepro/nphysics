@@ -6,7 +6,7 @@ use na::{self, Real};
 /// when considering a pair of touching surfaces. In practive, nphysics
 /// will average the coefficient of the two surfaces in contact in order
 /// to deduce the restitution/friction coefficient.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Material<N: Real> {
     /// Restitution coefficient of the surface.
     pub restitution: N,
