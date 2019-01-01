@@ -18,7 +18,6 @@ use kiss3d::window::{State, Window};
 use na::{self, Point2, Point3, Vector3};
 use ncollide3d::query::{self, Ray};
 use ncollide3d::utils::GenerationalId;
-use ncollide3d::world::CollisionGroups;
 use nphysics3d::joint::{ConstraintHandle, MouseConstraint};
 use nphysics3d::object::{BodyHandle, ColliderHandle};
 use nphysics3d::world::World;
@@ -289,7 +288,7 @@ impl State for Testbed {
                         let mut mintoi = Bounded::max_value();
                         let mut minb = None;
 
-                        let all_groups = CollisionGroups::new();
+                        let all_groups = [0];
                         for (b, inter) in physics_world
                             .collision_world()
                             .interferences_with_ray(&ray, &all_groups)
@@ -345,7 +344,7 @@ impl State for Testbed {
                         let mut mintoi = Bounded::max_value();
                         let mut minb = None;
 
-                        let all_groups = CollisionGroups::new();
+                        let all_groups = [0];
                         for (b, inter) in physics_world
                             .collision_world()
                             .interferences_with_ray(&ray, &all_groups)

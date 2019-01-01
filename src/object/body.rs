@@ -17,6 +17,12 @@ pub enum BodyStatus {
     Kinematic,
 }
 
+impl Default for BodyStatus {
+    fn default() -> Self {
+        BodyStatus::Dynamic
+    }
+}
+
 /// The activation status of a body.
 ///
 /// This controls whether a body is sleeping or not.

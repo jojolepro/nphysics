@@ -17,8 +17,8 @@ num-traits = "0.2"
 time       = "0.1"
 rand       = "0.5"
 nalgebra   = "0.16"
-kiss3d     = "0.17"
-ncollide3d = "0.17"
+kiss3d     = { git = "https://github.com/jojolepro/kiss3d", branch = "tmp" }
+ncollide3d = { git = "https://github.com/jojolepro/ncollide", branch = "collidegroup" }
 
 [dependencies.nphysics3d]
 path = "../build/nphysics3d"
