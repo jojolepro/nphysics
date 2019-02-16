@@ -28,7 +28,8 @@ alga       = "0.8"
 approx     = "0.3"
 downcast-rs = "1.0"
 bitflags   = "1.0"
-ncollide3d = "0.18"
+#ncollide3d = "0.18"
+ncollide3d = { git = "https://github.com/jojolepro/ncollide", branch = "changes" }
 serde      = { version = "1.0", optional = true, features = ["derive"]}
 
 [target.'cfg(feature = "serde")'.dependencies]
