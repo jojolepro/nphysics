@@ -1,6 +1,6 @@
 [package]
 name    = "nphysics3d"
-version = "0.10.2"
+version = "0.11.1"
 authors = [ "Sébastien Crozet <developer@crozet.re>" ]
 description = "3-dimensional physics engine in Rust."
 documentation = "http://nphysics.org/rustdoc/nphysics3d/index.html"
@@ -19,23 +19,23 @@ dim3    = [ ]
 [lib]
 name = "nphysics3d"
 path = "../../src/lib.rs"
+required-features = [ "dim3" ]
 
 [dependencies]
 either     = "1.0"
 num-traits = "0.2"
 slab       = "0.4"
-alga       = "0.8"
-approx     = "0.3"
-downcast-rs = "1.0"
-bitflags   = "1.0"
-#ncollide3d = "0.18"
-ncollide3d = { git = "https://github.com/jojolepro/ncollide", branch = "changes" }
 serde      = { version = "1.0", optional = true, features = ["derive"]}
 
 [target.'cfg(feature = "serde")'.dependencies]
-nalgebra   = { version = "0.17", features = [ "sparse", "serde-serialize" ] }
+nalgebra   = { version = "0.18", features = [ "sparse", "serde-serialize" ] }
 [target.'cfg(not(feature = "serde"))'.dependencies]
-nalgebra   = { version = "0.17", features = [ "sparse" ] }
+nalgebra   = { version = "0.18", features = [ "sparse" ] }
+alga       = "0.9"
+approx     = "0.3"
+downcast-rs = "1.0"
+bitflags   = "1.0"
+ncollide3d = "0.19"
 
 [target.wasm32-unknown-unknown.dependencies]
 stdweb = {version = "0.4", optional = true}

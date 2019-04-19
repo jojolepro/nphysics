@@ -2,13 +2,12 @@ use std::ops::MulAssign;
 use std::any::Any;
 
 use ncollide::shape::DeformationsType;
-use ncollide::utils::IsometryOps;
 use crate::joint::Joint;
 use crate::math::{
     AngularDim, Dim, Force, Inertia, Isometry, Jacobian, Point, SpatialMatrix,
     Vector, Velocity, DIM, Translation, ForceType
 };
-use na::{self, DMatrix, DVector, DVectorSlice, DVectorSliceMut, Dynamic, MatrixMN, Real, LU};
+use na::{self, DMatrix, DVector, DVectorSlice, DVectorSliceMut, Dynamic, MatrixMN, RealField, LU};
 use crate::object::{
     ActivationStatus, BodyPartHandle, BodyStatus, MultibodyLink, BodyUpdateStatus,
     MultibodyLinkVec, Body, BodyPart, BodyHandle, ColliderDesc, BodyDesc
@@ -18,7 +17,7 @@ use crate::world::{World, ColliderWorld};
 use crate::utils::{GeneralizedCross, IndexMut2};
 
 /// An articulated body simulated using the reduced-coordinates approach.
-pub struct Multibody<N: Real> {
+pub struct Multibody<N: RealField> {
     name: String,
     handle: BodyHandle,
     rbs: MultibodyLinkVec<N>,
@@ -55,7 +54,7 @@ pub struct Multibody<N: Real> {
     solver_workspace: Option<SolverWorkspace<N>>
 }
 
-impl<N: Real> Multibody<N> {
+impl<N: RealField> Multibody<N> {
     /// Creates a new multibody with no link.
     fn new(handle: BodyHandle) -> Self {
         Multibody {
@@ -327,16 +326,13 @@ impl<N: Real> Multibody<N> {
 
     /// Computes the constant terms of the dynamics.
     fn update_dynamics(&mut self, dt: N) {
-        if !self.update_status.inertia_needs_update() || self.status != BodyStatus::Dynamic {
+        if !self.update_status.inertia_needs_update() {
             return;
-        }
-
-        if !self.is_active() {
-            self.activate();
         }
 
         /*
          * Compute velocities.
+         * NOTE: this is needed for kinematic bodies too.
          */
         let rb = &mut self.rbs[0];
         let velocity_wrt_joint = rb
@@ -369,8 +365,14 @@ impl<N: Real> Multibody<N> {
             rb.velocity.linear += parent_rb.velocity.angular_vector().gcross(&shift);
         }
 
+        // We don't need to update the inertia properties if we
+        // have a kinematic body.
         if self.status != BodyStatus::Dynamic {
             return;
+        }
+
+        if !self.is_active() {
+            self.activate();
         }
 
         /*
@@ -702,12 +704,12 @@ impl<N: Real> Multibody<N> {
 }
 
 /// A temporary workspace for various updates of the multibody.
-struct MultibodyWorkspace<N: Real> {
+struct MultibodyWorkspace<N: RealField> {
     accs: Vec<Velocity<N>>,
     ndofs_vec: DVector<N>,
 }
 
-impl<N: Real> MultibodyWorkspace<N> {
+impl<N: RealField> MultibodyWorkspace<N> {
     /// Create an empty workspace.
     pub fn new() -> Self {
         MultibodyWorkspace {
@@ -724,12 +726,12 @@ impl<N: Real> MultibodyWorkspace<N> {
     }
 }
 
-struct SolverWorkspace<N: Real> {
+struct SolverWorkspace<N: RealField> {
     jacobians: DVector<N>,
     constraints: ConstraintSet<N>,
 }
 
-impl<N: Real> SolverWorkspace<N> {
+impl<N: RealField> SolverWorkspace<N> {
     pub fn new() -> Self {
         SolverWorkspace {
             jacobians: DVector::zeros(0),
@@ -746,7 +748,7 @@ impl<N: Real> SolverWorkspace<N> {
     }
 }
 
-impl<N: Real> Body<N> for Multibody<N> {
+impl<N: RealField> Body<N> for Multibody<N> {
     #[inline]
     fn name(&self) -> &str {
         &self.name
@@ -955,12 +957,11 @@ impl<N: Real> Body<N> for Multibody<N> {
         out_vel: Option<&mut N>
     ) {
         let link = part.downcast_ref::<MultibodyLink<N>>().expect("The provided body part must be a multibody link");
+        let pos = point - link.com.coords;
+        let force = force_dir.at_point(&pos);
 
         match self.status() {
             BodyStatus::Dynamic => {
-                let pos = point - link.com.coords;
-                let force = force_dir.at_point(&pos);
-
                 self.link_jacobian_mul_force(link, &force, &mut jacobians[j_id..]);
 
                 // FIXME: this could be optimized with a copy_nonoverlapping.
@@ -988,15 +989,7 @@ impl<N: Real> Body<N> for Multibody<N> {
             },
             BodyStatus::Kinematic => {
                 if let Some(out_vel) = out_vel {
-                    match *force_dir {
-                        ForceDirection::Linear(ref normal) => {
-                            let dpos = point - link.com;
-                            *out_vel = link.velocity.shift(&dpos).linear.dot(normal)
-                        }
-                        ForceDirection::Angular(ref axis) => {
-                            *out_vel = link.velocity.angular_vector().dot(axis)
-                        }
-                    }
+                    *out_vel += force.as_vector().dot(&link.velocity.as_vector())
                 }
             },
             BodyStatus::Static | BodyStatus::Disabled => {}
@@ -1195,7 +1188,7 @@ impl<N: Real> Body<N> for Multibody<N> {
 
 
 /// A multibody builder.
-pub struct MultibodyDesc<'a, N: Real> {
+pub struct MultibodyDesc<'a, N: RealField> {
     name: String,
     children: Vec<MultibodyDesc<'a, N>>,
     joint: Box<Joint<N>>,
@@ -1207,7 +1200,7 @@ pub struct MultibodyDesc<'a, N: Real> {
     parent_shift: Vector<N>
 }
 
-impl<'a, N: Real> MultibodyDesc<'a, N> {
+impl<'a, N: RealField> MultibodyDesc<'a, N> {
     /// Initialize a multibody builder with one link with one joint.
     pub fn new<J: Joint<N>>(joint: J) -> Self {
         MultibodyDesc {
@@ -1333,7 +1326,7 @@ impl<'a, N: Real> MultibodyDesc<'a, N> {
     }
 }
 
-impl<'a, N: Real> BodyDesc<N> for MultibodyDesc<'a, N> {
+impl<'a, N: RealField> BodyDesc<N> for MultibodyDesc<'a, N> {
     type Body = Multibody<N>;
 
     fn build_with_handle(&self, cworld: &mut ColliderWorld<N>, handle: BodyHandle) -> Multibody<N> {

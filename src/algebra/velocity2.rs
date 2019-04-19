@@ -1,5 +1,5 @@
 use na::storage::Storage;
-use na::{self, Isometry2, Real, Rotation2, U3, Vector, Vector1, Vector2, Vector3};
+use na::{self, Isometry2, RealField, Rotation2, U3, Vector, Vector1, Vector2, Vector3};
 use std::mem;
 use std::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
@@ -7,14 +7,14 @@ use std::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Velocity2<N: Real> {
+pub struct Velocity2<N: RealField> {
     /// The linear velocity.
     pub linear: Vector2<N>,
     /// The angular velocity.
     pub angular: N,
 }
 
-impl<N: Real> Velocity2<N> {
+impl<N: RealField> Velocity2<N> {
     /// Create velocity from its linear and angular parts.
     #[inline]
     pub fn new(linear: Vector2<N>, angular: N) -> Self {
@@ -126,7 +126,7 @@ impl<N: Real> Velocity2<N> {
     }
 }
 
-impl<N: Real> Add<Velocity2<N>> for Velocity2<N> {
+impl<N: RealField> Add<Velocity2<N>> for Velocity2<N> {
     type Output = Self;
 
     #[inline]
@@ -135,7 +135,7 @@ impl<N: Real> Add<Velocity2<N>> for Velocity2<N> {
     }
 }
 
-impl<N: Real> AddAssign<Velocity2<N>> for Velocity2<N> {
+impl<N: RealField> AddAssign<Velocity2<N>> for Velocity2<N> {
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.linear += rhs.linear;
@@ -143,7 +143,7 @@ impl<N: Real> AddAssign<Velocity2<N>> for Velocity2<N> {
     }
 }
 
-impl<N: Real> Sub<Velocity2<N>> for Velocity2<N> {
+impl<N: RealField> Sub<Velocity2<N>> for Velocity2<N> {
     type Output = Self;
 
     #[inline]
@@ -152,7 +152,7 @@ impl<N: Real> Sub<Velocity2<N>> for Velocity2<N> {
     }
 }
 
-impl<N: Real> SubAssign<Velocity2<N>> for Velocity2<N> {
+impl<N: RealField> SubAssign<Velocity2<N>> for Velocity2<N> {
     #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.linear -= rhs.linear;
@@ -160,7 +160,7 @@ impl<N: Real> SubAssign<Velocity2<N>> for Velocity2<N> {
     }
 }
 
-impl<N: Real> Mul<N> for Velocity2<N> {
+impl<N: RealField> Mul<N> for Velocity2<N> {
     type Output = Self;
 
     #[inline]

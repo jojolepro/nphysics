@@ -1,6 +1,6 @@
 use slab::Slab;
 
-use na::{self, Real};
+use na::{self, RealField};
 use ncollide;
 use ncollide::events::{ContactEvents, ProximityEvents};
 
@@ -19,7 +19,7 @@ use crate::world::ColliderWorld;
 
 
 /// The physics world.
-pub struct World<N: Real> {
+pub struct World<N: RealField> {
     counters: Counters,
     bodies: BodySet<N>,
     active_bodies: Vec<BodyHandle>,
@@ -35,7 +35,7 @@ pub struct World<N: Real> {
     params: IntegrationParameters<N>,
 }
 
-impl<N: Real> World<N> {
+impl<N: RealField> World<N> {
     /// Creates a new physics world with default parameters.
     ///
     /// The ground body is automatically created and added to the world without any colliders attached.
@@ -173,6 +173,18 @@ impl<N: Real> World<N> {
 
     /// Remove the specified collider from the world.
     pub fn remove_colliders(&mut self, handles: &[ColliderHandle]) {
+        let bodies = &mut self.bodies;
+
+        for handle in handles {
+            if let Some(it) = self.cworld.colliders_in_contact_with(*handle) {
+                it.for_each(|coll| {
+                    if let Some(b) = bodies.body_mut(coll.body()) {
+                        b.activate()
+                    }
+                });
+            }
+        }
+
         self.cworld.remove(handles);
     }
 
@@ -356,10 +368,13 @@ impl<N: Real> World<N> {
     pub fn remove_bodies(&mut self, handles: &[BodyHandle]) {
         for handle in handles {
             self.bodies.remove_body(*handle);
-            self.cworld.remove_body(*handle);
         }
 
         self.cleanup_after_body_removal();
+
+        for handle in handles {
+            self.cworld.remove_body(*handle);
+        }
     }
 
     fn cleanup_after_body_removal(&mut self) {
@@ -522,7 +537,7 @@ impl<N: Real> World<N> {
     }
 }
 
-impl<N: Real> Default for World<N> {
+impl<N: RealField> Default for World<N> {
     fn default() -> Self {
         Self::new()
     }

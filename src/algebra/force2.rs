@@ -1,5 +1,5 @@
 use na::storage::Storage;
-use na::{self, Point2, Real, U3, Vector, Vector1, Vector2, Vector3, Isometry2};
+use na::{self, Point2, RealField, U3, Vector, Vector1, Vector2, Vector3, Isometry2};
 use std::mem;
 use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 
@@ -7,14 +7,14 @@ use std::ops::{Add, AddAssign, Mul, Neg, Sub, SubAssign};
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Force2<N: Real> {
+pub struct Force2<N: RealField> {
     /// The linear force.
     pub linear: Vector2<N>,
     /// The torque.
     pub angular: N,
 }
 
-impl<N: Real> Force2<N> {
+impl<N: RealField> Force2<N> {
     /// Creates a force from its linear and angular components.
     #[inline]
     pub fn new(linear: Vector2<N>, angular: N) -> Self {
@@ -112,7 +112,7 @@ impl<N: Real> Force2<N> {
     }
 }
 
-impl<N: Real> Add<Force2<N>> for Force2<N> {
+impl<N: RealField> Add<Force2<N>> for Force2<N> {
     type Output = Self;
 
     #[inline]
@@ -121,7 +121,7 @@ impl<N: Real> Add<Force2<N>> for Force2<N> {
     }
 }
 
-impl<N: Real> AddAssign<Force2<N>> for Force2<N> {
+impl<N: RealField> AddAssign<Force2<N>> for Force2<N> {
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.linear += rhs.linear;
@@ -129,7 +129,7 @@ impl<N: Real> AddAssign<Force2<N>> for Force2<N> {
     }
 }
 
-impl<N: Real> Sub<Force2<N>> for Force2<N> {
+impl<N: RealField> Sub<Force2<N>> for Force2<N> {
     type Output = Self;
 
     #[inline]
@@ -138,7 +138,7 @@ impl<N: Real> Sub<Force2<N>> for Force2<N> {
     }
 }
 
-impl<N: Real> SubAssign<Force2<N>> for Force2<N> {
+impl<N: RealField> SubAssign<Force2<N>> for Force2<N> {
     #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.linear -= rhs.linear;
@@ -146,7 +146,7 @@ impl<N: Real> SubAssign<Force2<N>> for Force2<N> {
     }
 }
 
-impl<N: Real> Mul<N> for Force2<N> {
+impl<N: RealField> Mul<N> for Force2<N> {
     type Output = Self;
 
     #[inline]
@@ -155,7 +155,7 @@ impl<N: Real> Mul<N> for Force2<N> {
     }
 }
 
-impl<N: Real> Neg for Force2<N> {
+impl<N: RealField> Neg for Force2<N> {
     type Output = Self;
 
     #[inline]

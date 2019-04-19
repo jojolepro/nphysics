@@ -1,19 +1,19 @@
 use std::ops::{Add, AddAssign, Mul};
 
-use na::{self, Isometry3, Matrix3, Matrix6, Real, U3};
+use na::{self, Isometry3, Matrix3, Matrix6, RealField, U3};
 use crate::algebra::{Force3, Velocity3};
 
 /// The inertia of a rigid body grouping both its mass and its angular inertia.
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Inertia3<N: Real> {
+pub struct Inertia3<N: RealField> {
     /// The linear part (mass) of the inertia.
     pub linear: N,
     /// The angular inertia.
     pub angular: Matrix3<N>,
 }
 
-impl<N: Real> Inertia3<N> {
+impl<N: RealField> Inertia3<N> {
     /// Creates an inertia from its linear and angular components.
     pub fn new(linear: N, angular: Matrix3<N>) -> Self {
         Inertia3 { linear, angular }
@@ -70,7 +70,7 @@ impl<N: Real> Inertia3<N> {
     }
 }
 
-impl<N: Real> Add<Inertia3<N>> for Inertia3<N> {
+impl<N: RealField> Add<Inertia3<N>> for Inertia3<N> {
     type Output = Inertia3<N>;
 
     #[inline]
@@ -79,7 +79,7 @@ impl<N: Real> Add<Inertia3<N>> for Inertia3<N> {
     }
 }
 
-impl<N: Real> AddAssign<Inertia3<N>> for Inertia3<N> {
+impl<N: RealField> AddAssign<Inertia3<N>> for Inertia3<N> {
     #[inline]
     fn add_assign(&mut self, rhs: Inertia3<N>) {
         self.linear += rhs.linear;
@@ -87,7 +87,7 @@ impl<N: Real> AddAssign<Inertia3<N>> for Inertia3<N> {
     }
 }
 
-impl<N: Real> Mul<Velocity3<N>> for Inertia3<N> {
+impl<N: RealField> Mul<Velocity3<N>> for Inertia3<N> {
     type Output = Force3<N>;
 
     #[inline]
@@ -97,7 +97,7 @@ impl<N: Real> Mul<Velocity3<N>> for Inertia3<N> {
 }
 
 // NOTE: This is meaningful when `self` is the inverse inertia.
-impl<N: Real> Mul<Force3<N>> for Inertia3<N> {
+impl<N: RealField> Mul<Force3<N>> for Inertia3<N> {
     type Output = Velocity3<N>;
 
     #[inline]
