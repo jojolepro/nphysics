@@ -31,11 +31,12 @@ serde      = { version = "1.0", optional = true, features = ["derive"]}
 nalgebra   = { version = "0.18", features = [ "sparse", "serde-serialize" ] }
 [target.'cfg(not(feature = "serde"))'.dependencies]
 nalgebra   = { version = "0.18", features = [ "sparse" ] }
+
 alga       = "0.9"
 approx     = "0.3"
 downcast-rs = "1.0"
 bitflags   = "1.0"
-ncollide2d = "0.19"
+ncollide2d = { git = "https://github.com/rustsim/ncollide", branch = "master" }
 
 [target.wasm32-unknown-unknown.dependencies]
 stdweb = {version = "0.4", optional = true}

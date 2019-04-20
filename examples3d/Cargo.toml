@@ -8,7 +8,7 @@ edition = "2018"
 rand       = { version = "0.6", features = [ "stdweb" ] }
 num-traits = "0.2"
 nalgebra   = "0.18"
-ncollide3d = "0.19"
+ncollide3d = { git = "https://github.com/rustsim/ncollide", branch = "master" }
 kiss3d     = "0.19"
 
 [dependencies.nphysics3d]

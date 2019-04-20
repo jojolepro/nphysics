@@ -20,7 +20,7 @@ time       = "0.1"
 rand       = "0.6"
 nalgebra   = "0.18"
 kiss3d     = "0.19"
-ncollide3d = "0.19"
+ncollide3d = { git = "https://github.com/rustsim/ncollide", branch = "master" }
 
 [dependencies.nphysics3d]
 path = "../build/nphysics3d"
